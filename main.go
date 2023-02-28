@@ -8,7 +8,6 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -41,21 +40,15 @@ func main() {
 		}
 		defer client.Close()
 
-		iter := client.Collection("chats").Doc("testing").Collection("sec01").Documents(ctx)
-
-		for {
-			doc, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				break
-			}
-			fmt.Println(doc.Data())
+		dsnap, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Get(ctx)
+		if err != nil {
+			log.Fatalln(err)
 		}
+		m := dsnap.Data()
+		fmt.Printf("Document data: %#v\n", m)
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": requestBody.MessageID,
+			"message": m,
 		})
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
