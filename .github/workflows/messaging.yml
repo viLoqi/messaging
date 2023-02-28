@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     name: Build Server
     steps:
@@ -25,9 +25,5 @@ jobs:
       - name: Install Dependencies
         run: go get
 
-  test:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
       - name: Run test
         run: go test
