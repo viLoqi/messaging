@@ -131,9 +131,9 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/", HomepageHandler)
-	r.GET("/read", ReadFireStoreHandler)
-	r.POST("/write", WriteFireStoreHandler)
-	r.DELETE("/delete", DeleteFireStoreHandler)
+	r.GET("/api/messaging", ReadFireStoreHandler)
+	r.POST("/api/messaging", WriteFireStoreHandler)
+	r.DELETE("/api/messaging", DeleteFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
