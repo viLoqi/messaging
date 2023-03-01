@@ -52,9 +52,7 @@ func ReadFireStoreHandler(c *gin.Context) {
 	m := dsnap.Data()
 	fmt.Printf("Document data: %#v\n", m)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": requestBody.MessageID,
-	})
+	c.JSON(http.StatusOK, m)
 }
 
 func WriteFireStoreHandler(c *gin.Context) {
@@ -96,12 +94,46 @@ func WriteFireStoreHandler(c *gin.Context) {
 
 }
 
+func DeleteFireStoreHandler(c *gin.Context) {
+	var requestBody ReadMessageRequestBody
+
+	if err := c.BindJSON(&requestBody); err != nil {
+		// DO SOMETHING WITH THE ERROR
+	}
+
+	// Use a service account
+	ctx := context.Background()
+	sa := option.WithCredentialsFile("./cred.json")
+	app, err := firebase.NewApp(ctx, nil, sa)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer client.Close()
+
+	_, err = client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Delete(ctx)
+	if err != nil {
+		// Handle any errors in an appropriate way, such as returning them.
+		log.Printf("An error has occurred: %s", err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"removed": requestBody.MessageID,
+	})
+
+}
+
 func main() {
 	r := gin.Default()
 
 	r.GET("/", HomepageHandler)
 	r.GET("/read", ReadFireStoreHandler)
 	r.POST("/write", WriteFireStoreHandler)
+	r.DELETE("/delete", DeleteFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
