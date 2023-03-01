@@ -5,14 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	firebase "firebase.google.com/go"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/option"
 )
 
-type MessageRequestBody struct {
+type ReadMessageRequestBody struct {
 	MessageID string `json:"messageID,omitempty"`
+}
+
+type WriteMessageRequestBody struct {
+	Content string `json:"content,omitempty"`
 }
 
 func HomepageHandler(c *gin.Context) {
@@ -20,7 +25,7 @@ func HomepageHandler(c *gin.Context) {
 }
 
 func ReadFireStoreHandler(c *gin.Context) {
-	var requestBody MessageRequestBody
+	var requestBody ReadMessageRequestBody
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
@@ -52,11 +57,51 @@ func ReadFireStoreHandler(c *gin.Context) {
 	})
 }
 
+func WriteFireStoreHandler(c *gin.Context) {
+	var requestBody WriteMessageRequestBody
+
+	if err := c.BindJSON(&requestBody); err != nil {
+		// DO SOMETHING WITH THE ERROR
+	}
+
+	// Use a service account
+	ctx := context.Background()
+	sa := option.WithCredentialsFile("./cred.json")
+	app, err := firebase.NewApp(ctx, nil, sa)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer client.Close()
+
+	ref := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").NewDoc()
+
+	_, err = ref.Set(ctx, map[string]interface{}{
+		"author":      "Testing Script",
+		"content":     requestBody.Content,
+		"timeCreated": time.Now().Unix(),
+	})
+	if err != nil {
+		// Handle any errors in an appropriate way, such as returning them.
+		log.Printf("An error has occurred: %s", err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"messageID": ref.ID,
+	})
+
+}
+
 func main() {
 	r := gin.Default()
 
 	r.GET("/", HomepageHandler)
 	r.GET("/read", ReadFireStoreHandler)
+	r.POST("/write", WriteFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
