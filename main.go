@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -40,12 +41,18 @@ func CreateFireStoreClient() (*firestore.Client, context.Context) {
 func ReadFireStoreHandler(c *gin.Context) {
 	var requestBody ReadMessageRequestBody
 
+	client, ctx := CreateFireStoreClient()
+	defer client.Close()
+
+	if flag.Lookup("test.v") == nil {
+		fmt.Println("normal run")
+	} else {
+		fmt.Println("run under go test")
+	}
+
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
 	}
-
-	client, ctx := CreateFireStoreClient()
-	defer client.Close()
 
 	dsnap, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Get(ctx)
 	if err != nil {
@@ -67,6 +74,12 @@ func WriteFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
+	if flag.Lookup("test.v") == nil {
+		fmt.Println("normal run")
+	} else {
+		fmt.Println("run under go test")
+	}
+
 	ref := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").NewDoc()
 
 	_, err := ref.Set(ctx, map[string]interface{}{
@@ -87,6 +100,12 @@ func WriteFireStoreHandler(c *gin.Context) {
 
 func DeleteFireStoreHandler(c *gin.Context) {
 	var requestBody ReadMessageRequestBody
+
+	if flag.Lookup("test.v") == nil {
+		fmt.Println("normal run")
+	} else {
+		fmt.Println("run under go test")
+	}
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
