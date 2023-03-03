@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create service file
-        run: touch /home/runner/work/messaging/messaging/app/google-services.json | base64
+        run: ls
 
       - name: Putting data
         env:
