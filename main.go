@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/option"
@@ -20,17 +21,7 @@ type WriteMessageRequestBody struct {
 	Content string `json:"content,omitempty"`
 }
 
-func HomepageHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Welcome to Loqi's Messaging API"})
-}
-
-func ReadFireStoreHandler(c *gin.Context) {
-	var requestBody ReadMessageRequestBody
-
-	if err := c.BindJSON(&requestBody); err != nil {
-		// DO SOMETHING WITH THE ERROR
-	}
-
+func CreateFireStoreClient() (*firestore.Client, context.Context) {
 	// Use a service account
 	ctx := context.Background()
 	sa := option.WithCredentialsFile("./credentials.json")
@@ -43,6 +34,17 @@ func ReadFireStoreHandler(c *gin.Context) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	return client, ctx
+}
+
+func ReadFireStoreHandler(c *gin.Context) {
+	var requestBody ReadMessageRequestBody
+
+	if err := c.BindJSON(&requestBody); err != nil {
+		// DO SOMETHING WITH THE ERROR
+	}
+
+	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
 	dsnap, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Get(ctx)
@@ -62,23 +64,12 @@ func WriteFireStoreHandler(c *gin.Context) {
 		// DO SOMETHING WITH THE ERROR
 	}
 
-	// Use a service account
-	ctx := context.Background()
-	sa := option.WithCredentialsFile("./credentials.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
 	ref := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").NewDoc()
 
-	_, err = ref.Set(ctx, map[string]interface{}{
+	_, err := ref.Set(ctx, map[string]interface{}{
 		"author":      "Testing Script",
 		"content":     requestBody.Content,
 		"timeCreated": time.Now().Unix(),
@@ -101,21 +92,10 @@ func DeleteFireStoreHandler(c *gin.Context) {
 		// DO SOMETHING WITH THE ERROR
 	}
 
-	// Use a service account
-	ctx := context.Background()
-	sa := option.WithCredentialsFile("./credentials.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
-	_, err = client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Delete(ctx)
+	_, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Delete(ctx)
 	if err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
@@ -130,7 +110,6 @@ func DeleteFireStoreHandler(c *gin.Context) {
 func main() {
 	r := gin.Default()
 
-	r.GET("/", HomepageHandler)
 	r.GET("/api/messaging", ReadFireStoreHandler)
 	r.POST("/api/messaging", WriteFireStoreHandler)
 	r.DELETE("/api/messaging", DeleteFireStoreHandler)
