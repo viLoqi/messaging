@@ -33,7 +33,7 @@ func ReadFireStoreHandler(c *gin.Context) {
 
 	// Use a service account
 	ctx := context.Background()
-	sa := option.WithCredentialsFile("./cred.json")
+	sa := option.WithCredentialsFile("./credentials.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
@@ -64,7 +64,7 @@ func WriteFireStoreHandler(c *gin.Context) {
 
 	// Use a service account
 	ctx := context.Background()
-	sa := option.WithCredentialsFile("./cred.json")
+	sa := option.WithCredentialsFile("./credentials.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
@@ -103,7 +103,7 @@ func DeleteFireStoreHandler(c *gin.Context) {
 
 	// Use a service account
 	ctx := context.Background()
-	sa := option.WithCredentialsFile("./cred.json")
+	sa := option.WithCredentialsFile("./credentials.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)

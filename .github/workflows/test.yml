@@ -18,12 +18,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create service file
-        run: touch cred.json && cat cred.json | base64
+        run: touch credentials.json
 
       - name: Putting data
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo $DATA > ./cred.json
+        run: echo $DATA > ./credentials.json
 
       - name: Setup Go
         uses: actions/setup-go@v3
