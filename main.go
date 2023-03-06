@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,11 +14,12 @@ import (
 )
 
 type ReadMessageRequestBody struct {
-	MessageID string `json:"messageID,omitempty"`
+	FullMessagePath string `json:"fullMessagePath,omitempty"`
 }
 
 type WriteMessageRequestBody struct {
-	Content string `json:"content,omitempty"`
+	FullMessagePath string `json:"fullMessagePath,omitempty"`
+	Content         string `json:"content,omitempty"`
 }
 
 func CreateFireStoreClient() (*firestore.Client, context.Context) {
@@ -44,17 +44,12 @@ func ReadFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
-	if flag.Lookup("test.v") == nil {
-		fmt.Println("normal run")
-	} else {
-		fmt.Println("run under go test")
-	}
-
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
 	}
 
-	dsnap, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Get(ctx)
+	dsnap, err := client.Doc(requestBody.FullMessagePath).Get(ctx)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -74,20 +69,13 @@ func WriteFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
-	if flag.Lookup("test.v") == nil {
-		fmt.Println("normal run")
-	} else {
-		fmt.Println("run under go test")
-	}
+	ref := client.Collection(requestBody.FullMessagePath).NewDoc()
 
-	ref := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").NewDoc()
-
-	_, err := ref.Set(ctx, map[string]interface{}{
+	if _, err := ref.Set(ctx, map[string]interface{}{
 		"author":      "Testing Script",
 		"content":     requestBody.Content,
 		"timeCreated": time.Now().Unix(),
-	})
-	if err != nil {
+	}); err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
 	}
@@ -101,12 +89,6 @@ func WriteFireStoreHandler(c *gin.Context) {
 func DeleteFireStoreHandler(c *gin.Context) {
 	var requestBody ReadMessageRequestBody
 
-	if flag.Lookup("test.v") == nil {
-		fmt.Println("normal run")
-	} else {
-		fmt.Println("run under go test")
-	}
-
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
 	}
@@ -114,14 +96,13 @@ func DeleteFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
-	_, err := client.Collection("chats").Doc("SAM101").Collection("sec01").Doc("room").Collection("messages").Doc(requestBody.MessageID).Delete(ctx)
-	if err != nil {
+	if _, err := client.Doc(requestBody.FullMessagePath).Delete(ctx); err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"removed": requestBody.MessageID,
+		"removed": requestBody.FullMessagePath,
 	})
 
 }

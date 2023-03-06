@@ -19,7 +19,7 @@ func SetUpRouter() *gin.Engine {
 
 func TestReadFireStoreHandler(t *testing.T) {
 	requestBody, _ := json.Marshal(map[string]string{
-		"messageID": "CvJ0pNJw8HZ6izKARGfW",
+		"fullMessagePath": "chats/SAM101/sec01/room/messages/CvJ0pNJw8HZ6izKARGfW",
 	})
 
 	responseBody, _ := json.Marshal(map[string]interface{}{
@@ -39,27 +39,35 @@ func TestReadFireStoreHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-// func TestWriteFireStoreHandler(t *testing.T) {
-// 	mockResponse := `{"message":"Welcome to Loqi's Messaging API"}`
-// 	r := SetUpRouter()
-// 	r.POST("/api/messaging", HomepageHandler)
-// 	req, _ := http.NewRequest("POST", "/api/messaging", nil)
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+func TestWriteFireStoreHandler(t *testing.T) {
+	requestBody, _ := json.Marshal(map[string]string{
+		"fullMessagePath": "chats/SAM101/sec01/room/messages",
+		"content":         "Wassup!!!",
+	})
 
-// 	responseData, _ := ioutil.ReadAll(w.Body)
-// 	assert.Equal(t, mockResponse, string(responseData))
-// 	assert.Equal(t, http.StatusOK, w.Code)
-// }
-// func TestDeleteFireStoreHandler(t *testing.T) {
-// 	mockResponse := `{"message":"Welcome to Loqi's Messaging API"}`
-// 	r := SetUpRouter()
-// 	r.DELETE("/api/messaging", HomepageHandler)
-// 	req, _ := http.NewRequest("DELETE", "/api/messaging", nil)
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
+	r := SetUpRouter()
+	r.POST("/api/messaging", WriteFireStoreHandler)
+	req, _ := http.NewRequest("POST", "/api/messaging", bytes.NewBuffer(requestBody))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-// 	responseData, _ := ioutil.ReadAll(w.Body)
-// 	assert.Equal(t, mockResponse, string(responseData))
-// 	assert.Equal(t, http.StatusOK, w.Code)
-// }
+	// responseData, _ := ioutil.ReadAll(w.Body)
+	// assert.Equal(t, responseBody, responseData)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestDeleteFireStoreHandler(t *testing.T) {
+	requestBody, _ := json.Marshal(map[string]string{
+		"fullMessagePath": "chats/SAM101/sec01/room/messages",
+	})
+
+	r := SetUpRouter()
+	r.DELETE("/api/messaging", DeleteFireStoreHandler)
+	req, _ := http.NewRequest("DELETE", "/api/messaging", bytes.NewBuffer(requestBody))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	// responseData, _ := ioutil.ReadAll(w.Body)
+	// assert.Equal(t, responseBody, responseData)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
