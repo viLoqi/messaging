@@ -22,6 +22,14 @@ type WriteMessageRequestBody struct {
 	Content        string `json:"content,omitempty"`
 }
 
+func SanitizeFirestorePath(path string) string {
+	lastIndex := len(path) - 1
+	if path[lastIndex] == '/' {
+		return path[:lastIndex]
+	}
+	return path
+}
+
 func CreateFireStoreClient() (*firestore.Client, context.Context) {
 	// Use a service account
 	ctx := context.Background()
@@ -50,9 +58,11 @@ func ReadFireStoreHandler(c *gin.Context) {
 
 	dsnap, err := client.Doc(requestBody.FullMessagePath).Get(ctx)
 
+	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"fullMessagePath": requestBody.FullMessagePath})
+			"fullMessagePath": path})
 	} else {
 		m := dsnap.Data()
 		fmt.Printf("Document data: %#v\n", m)
@@ -71,7 +81,9 @@ func WriteFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
-	ref := client.Collection(requestBody.CollectionPath).NewDoc()
+	collectionPath := SanitizeFirestorePath(requestBody.CollectionPath)
+
+	ref := client.Collection(collectionPath).NewDoc()
 
 	if _, err := ref.Set(ctx, gin.H{
 		"author":      "Testing Script",
@@ -98,14 +110,16 @@ func DeleteFireStoreHandler(c *gin.Context) {
 	client, ctx := CreateFireStoreClient()
 	defer client.Close()
 
+	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+
 	if _, err := client.Doc(requestBody.FullMessagePath).Delete(ctx); err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		c.JSON(http.StatusNotFound, gin.H{
-			"fullMessagePath": requestBody.FullMessagePath,
+			"fullMessagePath": path,
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"removedFullMessagePath": requestBody.FullMessagePath,
+			"removedFullMessagePath": path,
 		})
 	}
 }
