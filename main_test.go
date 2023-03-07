@@ -23,7 +23,7 @@ type ReadResponseBody struct {
 }
 
 type DeleteResponseBody struct {
-	Removed string `json:"removed,omitempty"`
+	RemovedFullMessagePath string `json:"removedFullMessagePath,omitempty"`
 }
 
 func SetUpRouter() *gin.Engine {
@@ -90,7 +90,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	json.Unmarshal(deleteResponseBody, &deleteResponseFromAPI)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, expectedDeleteResponseFromAPI, deleteResponseFromAPI.Removed)
+	assert.Equal(t, expectedDeleteResponseFromAPI, deleteResponseFromAPI.RemovedFullMessagePath)
 }
 
 func TestReadFireStoreHandlerNotFound(t *testing.T) {

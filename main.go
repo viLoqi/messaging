@@ -105,7 +105,7 @@ func DeleteFireStoreHandler(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"removed": requestBody.FullMessagePath,
+			"removedFullMessagePath": requestBody.FullMessagePath,
 		})
 	}
 }
