@@ -14,12 +14,17 @@ import (
 )
 
 type ReadMessageRequestBody struct {
-	FullMessagePath string `json:"fullMessagePath,omitempty"`
+	FullMessagePath string `json:"fullMessagePath"`
 }
 
 type WriteMessageRequestBody struct {
-	CollectionPath string `json:"collectionPath,omitempty"`
-	Content        string `json:"content,omitempty"`
+	CollectionPath string `json:"collectionPath"`
+	Content        string `json:"content"`
+}
+
+type PatchMessageRequestBody struct {
+	FullMessagePath string `json:"fullMessagePath"`
+	Content         string `json:"content"`
 }
 
 func SanitizeFirestorePath(path string) string {
@@ -124,12 +129,42 @@ func DeleteFireStoreHandler(c *gin.Context) {
 	}
 }
 
+func PatchFireStoreHandler(c *gin.Context) {
+	var requestBody PatchMessageRequestBody
+
+	if err := c.BindJSON(&requestBody); err != nil {
+		// DO SOMETHING WITH THE ERROR
+	}
+
+	fmt.Println(requestBody)
+
+	client, ctx := CreateFireStoreClient()
+	defer client.Close()
+
+	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+	newContent := requestBody.Content
+
+	_, err := client.Doc(path).Update(ctx, []firestore.Update{
+		{
+			Path:  "capital",
+			Value: newContent,
+		},
+	})
+
+	if err != nil {
+		// Handle any errors in an appropriate way, such as returning them.
+		log.Printf("An error has occurred: %s", err)
+	}
+
+}
+
 func main() {
 	r := gin.Default()
 
 	r.GET("/api/messaging", ReadFireStoreHandler)
 	r.POST("/api/messaging", WriteFireStoreHandler)
 	r.DELETE("/api/messaging", DeleteFireStoreHandler)
+	r.PATCH("/api/messaging", PatchFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
