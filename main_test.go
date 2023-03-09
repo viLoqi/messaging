@@ -98,9 +98,7 @@ func TestReadFireStoreHandlerNotFound(t *testing.T) {
 		"fullMessagePath": "invalidPath",
 	})
 
-	responseBody, _ := json.Marshal(map[string]interface{}{
-		"fullMessagePath": "invalidPath",
-	})
+	expectedResponseBody := "\"firestore: nil DocumentRef\""
 
 	r := SetUpRouter()
 	r.GET("/api/messaging", ReadFireStoreHandler)
@@ -109,7 +107,7 @@ func TestReadFireStoreHandlerNotFound(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	responseData, _ := io.ReadAll(w.Body)
-	assert.Equal(t, responseBody, responseData)
+	assert.Equal(t, expectedResponseBody, string(responseData))
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
