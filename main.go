@@ -90,9 +90,10 @@ func WriteFireStoreHandler(c *gin.Context) {
 	ref := client.Collection(collectionPath).NewDoc()
 
 	if _, err := ref.Set(ctx, gin.H{
-		"author":      "Testing Script",
-		"content":     requestBody.Content,
-		"timeCreated": firestore.ServerTimestamp,
+		"author":       "Testing Script",
+		"content":      requestBody.Content,
+		"firstCreated": firestore.ServerTimestamp,
+		"lastUpdated":  firestore.ServerTimestamp,
 	}); err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred with writing the document: %s", err)
@@ -146,7 +147,7 @@ func PatchFireStoreHandler(c *gin.Context) {
 			Value: newContent,
 		},
 		{
-			Path:  "timeCreated",
+			Path:  "lastUpdated",
 			Value: firestore.ServerTimestamp,
 		},
 	}); err != nil {

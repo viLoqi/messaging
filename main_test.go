@@ -13,17 +13,18 @@ import (
 )
 
 type WriteResponseBody struct {
-	MessageId string `json:"messageID,omitempty"`
+	MessageId string `json:"messageID"`
 }
 
 type ReadResponseBody struct {
-	Author      string `json:"author,omitempty"`
-	Content     string `json:"content,omitempty"`
-	TimeCreated int    `json:"timeCreated,omitempty"`
+	Author       string `json:"author"`
+	Content      string `json:"content"`
+	FirstCreated int    `json:"firstCreated"`
+	LastUpdated  int    `json:"lastUpdated"`
 }
 
 type DeleteResponseBody struct {
-	RemovedFullMessagePath string `json:"removedFullMessagePath,omitempty"`
+	RemovedFullMessagePath string `json:"removedFullMessagePath"`
 }
 
 func SetUpRouter() *gin.Engine {
@@ -40,7 +41,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 
 	// Initialization
 	unitTestCollection := "chats/SAM101/sec01/room/messages"
-	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "timeCreated": 12312312}`), &expectedReadResponseFromAPI)
+	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
 
 	// Setting up Routes
 	r := SetUpRouter()
