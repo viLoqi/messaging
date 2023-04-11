@@ -167,11 +167,14 @@ func HomeHandler(c *gin.Context) {
 
 func main() {
 	r := gin.Default()
+
+	var messagingServiceRoute = "/api/messaging"
+
 	r.GET("/", HomeHandler)
-	r.GET("/api/messaging", ReadFireStoreHandler)
-	r.POST("/api/messaging", WriteFireStoreHandler)
-	r.DELETE("/api/messaging", DeleteFireStoreHandler)
-	r.PATCH("/api/messaging", PatchFireStoreHandler)
+	r.GET(messagingServiceRoute, ReadFireStoreHandler)
+	r.POST(messagingServiceRoute, WriteFireStoreHandler)
+	r.DELETE(messagingServiceRoute, DeleteFireStoreHandler)
+	r.PATCH(messagingServiceRoute, PatchFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
