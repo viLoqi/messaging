@@ -161,9 +161,13 @@ func PatchFireStoreHandler(c *gin.Context) {
 
 }
 
+func HomeHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Welcome to Loqi's Messaging API"})
+}
+
 func main() {
 	r := gin.Default()
-
+	r.GET("/", HomeHandler)
 	r.GET("/api/messaging", ReadFireStoreHandler)
 	r.POST("/api/messaging", WriteFireStoreHandler)
 	r.DELETE("/api/messaging", DeleteFireStoreHandler)
