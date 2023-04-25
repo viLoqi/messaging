@@ -1,4 +1,4 @@
-name: Messaging Service
+name: Run Messaging Test
 
 on:
   push:
