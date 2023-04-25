@@ -110,7 +110,7 @@ func DeleteFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("Delete RequestBody Error: \n", err)
+		log.Printf("Delete RequestBody Error: \n%s", err)
 	}
 
 	client, ctx := CreateFireStoreClient()
@@ -133,7 +133,7 @@ func PatchFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("Update RequestBody Error: \n", err)
+		log.Printf("Update RequestBody Error: \n%s", err)
 	}
 
 	client, ctx := CreateFireStoreClient()
