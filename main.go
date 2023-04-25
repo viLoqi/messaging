@@ -26,6 +26,7 @@ type PatchMessageRequestBody struct {
 }
 
 func SanitizeFirestorePath(path string) string {
+	// Removes trailing / if there is one
 	if len(path) > 0 {
 		lastIndex := len(path) - 1
 		if path[lastIndex] == '/' {
@@ -59,7 +60,7 @@ func ReadFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("An error has occurred with the requestBody: %s", err)
+		log.Printf("Read RequestBody Error: %s\n", err)
 	}
 
 	path := SanitizeFirestorePath(requestBody.FullMessagePath)
@@ -79,7 +80,7 @@ func WriteFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("An error has occurred with the requestBody: %s", err)
+		log.Printf("Write RequestBody Error: \n%s", err)
 	}
 
 	client, ctx := CreateFireStoreClient()
@@ -96,7 +97,7 @@ func WriteFireStoreHandler(c *gin.Context) {
 		"lastUpdated":  firestore.ServerTimestamp,
 	}); err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
-		log.Printf("An error has occurred with writing the document: %s", err)
+		log.Printf("Write Failure: %s\n", err)
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"messageID": ref.ID,
@@ -109,7 +110,7 @@ func DeleteFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("An error has occurred with the requestBody: %s", err)
+		log.Printf("Delete RequestBody Error: \n", err)
 	}
 
 	client, ctx := CreateFireStoreClient()
@@ -132,7 +133,7 @@ func PatchFireStoreHandler(c *gin.Context) {
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
-		log.Printf("An error has occurred with the requestBody: %s", err)
+		log.Printf("Update RequestBody Error: \n", err)
 	}
 
 	client, ctx := CreateFireStoreClient()
