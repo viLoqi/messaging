@@ -40,7 +40,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	var expectedReadResponseFromAPI ReadResponseBody
 
 	// Initialization
-	unitTestCollection := "chats/SAM101/sec01/room/messages"
+	unitTestCollection := "chats/CSE101/01-LEC/room/messages"
 	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
 
 	// Setting up Routes
