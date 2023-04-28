@@ -32,6 +32,10 @@ func SetUpRouter() *gin.Engine {
 	return router
 }
 
+// Initialization
+var unitTestCollection string = "chats/TEST/01-LEC/room/messages"
+var testingRoute string = "/api/messaging"
+
 func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	//Set Up
 	var writeResponseFromAPI WriteResponseBody
@@ -40,14 +44,13 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	var expectedReadResponseFromAPI ReadResponseBody
 
 	// Initialization
-	unitTestCollection := "chats/CSE101/01-LEC/room/messages"
 	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
 
 	// Setting up Routes
 	r := SetUpRouter()
-	r.GET("/api/messaging", ReadFireStoreHandler)
-	r.POST("/api/messaging", WriteFireStoreHandler)
-	r.DELETE("/api/messaging", DeleteFireStoreHandler)
+	r.GET(testingRoute, ReadFireStoreHandler)
+	r.POST(testingRoute, WriteFireStoreHandler)
+	r.DELETE(testingRoute, DeleteFireStoreHandler)
 	w := httptest.NewRecorder()
 
 	// Testing POST Functionalities
@@ -55,7 +58,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 		"collectionPath": unitTestCollection,
 		"content":        "This is to test read functionality",
 	})
-	postRequest, _ := http.NewRequest("POST", "/api/messaging", bytes.NewBuffer(postRequestBody))
+	postRequest, _ := http.NewRequest("POST", testingRoute, bytes.NewBuffer(postRequestBody))
 
 	r.ServeHTTP(w, postRequest)
 	postResponseBody, _ := io.ReadAll(w.Body)
@@ -68,7 +71,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	getRequestBody, _ := json.Marshal(map[string]string{
 		"fullMessagePath": testMessageRefPath,
 	})
-	getRequest, _ := http.NewRequest("GET", "/api/messaging", bytes.NewBuffer(getRequestBody))
+	getRequest, _ := http.NewRequest("GET", testingRoute, bytes.NewBuffer(getRequestBody))
 
 	r.ServeHTTP(w, getRequest)
 	getResponseBody, _ := io.ReadAll(w.Body)
@@ -84,7 +87,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	deleteRequestBody, _ := json.Marshal(map[string]string{
 		"fullMessagePath": testMessageRefPath,
 	})
-	deleteRequest, _ := http.NewRequest("DELETE", "/api/messaging", bytes.NewBuffer(deleteRequestBody))
+	deleteRequest, _ := http.NewRequest("DELETE", testingRoute, bytes.NewBuffer(deleteRequestBody))
 
 	r.ServeHTTP(w, deleteRequest)
 	deleteResponseBody, _ := io.ReadAll(w.Body)
@@ -102,8 +105,8 @@ func TestReadFireStoreHandlerNotFound(t *testing.T) {
 	expectedResponseBody := "\"firestore: nil DocumentRef\""
 
 	r := SetUpRouter()
-	r.GET("/api/messaging", ReadFireStoreHandler)
-	req, _ := http.NewRequest("GET", "/api/messaging", bytes.NewBuffer(requestBody))
+	r.GET(testingRoute, ReadFireStoreHandler)
+	req, _ := http.NewRequest("GET", testingRoute, bytes.NewBuffer(requestBody))
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -111,29 +114,3 @@ func TestReadFireStoreHandlerNotFound(t *testing.T) {
 	assert.Equal(t, expectedResponseBody, string(responseData))
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
-
-// func TestDeleteFireStoreHandlerNotFound(t *testing.T) {
-// 	testCollectionPath := "chats/SAM101/sec01/room/messages"
-// 	messageID := "kdurYFGaEk5ggGau8v43"
-
-// 	fullMessagePath := fmt.Sprintf("%s/%s", testCollectionPath, messageID)
-
-// 	requestBody, _ := json.Marshal(map[string]string{
-// 		"fullMessagePath": fullMessagePath,
-// 	})
-
-// 	responseBody, _ := json.Marshal(map[string]interface{}{
-// 		"removed": fullMessagePath,
-// 	})
-
-// 	r := SetUpRouter()
-// 	r.DELETE("/api/messaging", DeleteFireStoreHandler)
-// 	req, _ := http.NewRequest("DELETE", "/api/messaging", bytes.NewBuffer(requestBody))
-// 	w := httptest.NewRecorder()
-// 	r.ServeHTTP(w, req)
-
-// 	responseData, _ := io.ReadAll(w.Body)
-// 	assert.Equal(t, responseBody, responseData)
-// 	assert.Equal(t, http.StatusOK, w.Code)
-
-// }
