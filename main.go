@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	h "loqi/messaging/helper"
+	core "loqi/messaging/core"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,16 +13,15 @@ func ReadFireStoreHandler(c *gin.Context) {
 		FullMessagePath string `json:"fullMessagePath"`
 	}
 
-	var requestBody ReadMessageRequestBody
-
-	client, ctx := h.CreateFireStoreClient()
+	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
+	var requestBody ReadMessageRequestBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Read RequestBody Error: %s\n", err)
 	}
 
-	data, err := h.GetSnapShotData(client, ctx, requestBody.FullMessagePath)
+	data, err := core.GetSnapShotData(client, ctx, requestBody.FullMessagePath)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -37,21 +36,20 @@ func WriteFireStoreHandler(c *gin.Context) {
 		Content        string `json:"content"`
 	}
 
-	var requestBody WriteMessageRequestBody
-
-	if err := c.BindJSON(&requestBody); err != nil {
-		log.Printf("Write RequestBody Error: \n%s", err)
-	}
-
-	client, ctx := h.CreateFireStoreClient()
+	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	res, err := h.CreateNewDocument(client, ctx, requestBody.CollectionPath, requestBody.Content)
+	var requestBody WriteMessageRequestBody
+	if err := c.BindJSON(&requestBody); err != nil {
+		log.Printf("Write RequestBody Error: %s\n", err)
+	}
+
+	ref, err := core.CreateNewDocument(client, ctx, requestBody.CollectionPath, requestBody.Content)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
-		c.JSON(http.StatusOK, res)
+		c.JSON(http.StatusOK, gin.H{"messageID": ref.ID})
 	}
 }
 
@@ -61,22 +59,20 @@ func PatchFireStoreHandler(c *gin.Context) {
 		Content         string `json:"content"`
 	}
 
-	var requestBody PatchMessageRequestBody
-
-	if err := c.BindJSON(&requestBody); err != nil {
-		// DO SOMETHING WITH THE ERROR
-		log.Printf("Update RequestBody Error: \n%s", err)
-	}
-
-	client, ctx := h.CreateFireStoreClient()
+	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	res, err := h.UpdateDocument(client, ctx, requestBody.FullMessagePath, requestBody.Content)
+	var requestBody PatchMessageRequestBody
+	if err := c.BindJSON(&requestBody); err != nil {
+		log.Printf("Patch RequestBody Error: %s\n", err)
+	}
+
+	_, err := core.UpdateDocument(client, ctx, requestBody.FullMessagePath, requestBody.Content)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
-		c.JSON(http.StatusOK, res)
+		c.JSON(http.StatusOK, gin.H{})
 	}
 
 }
@@ -85,23 +81,21 @@ func DeleteFireStoreHandler(c *gin.Context) {
 	type DeleteMessageRequestBody struct {
 		FullMessagePath string `json:"fullMessagePath"`
 	}
-	var requestBody DeleteMessageRequestBody
 
-	if err := c.BindJSON(&requestBody); err != nil {
-		log.Printf("Delete RequestBody Error: \n%s", err)
-	}
-
-	client, ctx := h.CreateFireStoreClient()
+	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	path := requestBody.FullMessagePath
+	var requestBody DeleteMessageRequestBody
+	if err := c.BindJSON(&requestBody); err != nil {
+		log.Printf("Delete RequestBody Error: %s\n", err)
+	}
 
-	res, err := h.DeleteDocument(client, ctx, path)
+	_, err := core.DeleteDocument(client, ctx, requestBody.FullMessagePath)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
-		c.JSON(http.StatusOK, res)
+		c.JSON(http.StatusOK, gin.H{"removedFullMessagePath": requestBody.FullMessagePath})
 	}
 }
 

@@ -30,7 +30,10 @@ curl -X GET http://localhost:8080/api/messaging -H 'Content-Type: application/js
 Response
 ```tsx
 {
-    "UpdateTime": Date
+    "author": string,
+    "content": string,
+    "firstCreated": Date,
+    "lastUpdated": Date
 }
 ```
 
@@ -59,6 +62,6 @@ curl -X DELETE http://localhost:8080/api/messaging -H 'Content-Type: application
 Response
 ```tsx
 {
-    "UpdateTime": Date
+    "removedFullMessagePath": string
 }
 ```

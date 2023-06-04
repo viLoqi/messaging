@@ -1,4 +1,4 @@
-package helper
+package core
 
 import (
 	"context"
@@ -31,17 +31,17 @@ func GetSnapShotData(client *firestore.Client, ctx context.Context, path string)
 	return dsnap.Data(), err
 }
 
-func CreateNewDocument(client *firestore.Client, ctx context.Context, path, content string) (*firestore.WriteResult, error) {
+func CreateNewDocument(client *firestore.Client, ctx context.Context, path, content string) (*firestore.DocumentRef, error) {
 	ref := client.Collection(path).NewDoc()
 
-	res, err := ref.Set(ctx, gin.H{
+	_, err := ref.Set(ctx, gin.H{
 		"author":       "Testing Script",
 		"content":      content,
 		"firstCreated": firestore.ServerTimestamp,
 		"lastUpdated":  firestore.ServerTimestamp,
 	})
 
-	return res, err
+	return ref, err
 }
 
 func DeleteDocument(client *firestore.Client, ctx context.Context, path string) (*firestore.WriteResult, error) {
@@ -61,15 +61,4 @@ func UpdateDocument(client *firestore.Client, ctx context.Context, path, content
 		},
 	})
 	return res, err
-}
-
-type RequestBodyDefinition interface {
-	area() float64
-	perim() float64
-}
-
-func BindRequestBody(c *gin.Context, destination *RequestBodyDefinition) {
-	if err := c.BindJSON(destination); err != nil {
-		log.Printf("Read RequestBody Error: %s\n", err)
-	}
 }
