@@ -35,5 +35,7 @@ EXPOSE 8080
 
 WORKDIR /go
 
+COPY credentials.json .
+
 # Run the Go Gin binary.
 ENTRYPOINT ["/go/main"]
