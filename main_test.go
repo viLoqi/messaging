@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
+	"loqi/messaging/structs"
+	h "loqi/messaging/testing"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,21 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
-
-type WriteResponseBody struct {
-	MessageId string `json:"messageID"`
-}
-
-type ReadResponseBody struct {
-	Author       string `json:"author"`
-	Content      string `json:"content"`
-	FirstCreated int    `json:"firstCreated"`
-	LastUpdated  int    `json:"lastUpdated"`
-}
-
-type DeleteResponseBody struct {
-	RemovedFullMessagePath string `json:"removedFullMessagePath"`
-}
 
 func SetUpRouter() *gin.Engine {
 	router := gin.Default()
@@ -38,10 +23,7 @@ var testingRoute string = "/api/messaging"
 
 func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	//Set Up
-	var writeResponseFromAPI WriteResponseBody
-	var readResponseFromAPI ReadResponseBody
-	var deleteResponseFromAPI DeleteResponseBody
-	var expectedReadResponseFromAPI ReadResponseBody
+	var expectedReadResponseFromAPI structs.ReadResponseBody
 
 	// Initialization
 	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
@@ -58,12 +40,8 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 		"collectionPath": unitTestCollection,
 		"content":        "This is to test read functionality",
 	})
-	postRequest, _ := http.NewRequest("POST", testingRoute, bytes.NewBuffer(postRequestBody))
 
-	r.ServeHTTP(w, postRequest)
-	postResponseBody, _ := io.ReadAll(w.Body)
-	json.Unmarshal(postResponseBody, &writeResponseFromAPI)
-	testMessageRefPath := unitTestCollection + "/" + writeResponseFromAPI.MessageId
+	testMessageRefPath := h.MakePostRequest(r, w, postRequestBody)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
@@ -71,11 +49,8 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	getRequestBody, _ := json.Marshal(map[string]string{
 		"fullMessagePath": testMessageRefPath,
 	})
-	getRequest, _ := http.NewRequest("GET", testingRoute, bytes.NewBuffer(getRequestBody))
 
-	r.ServeHTTP(w, getRequest)
-	getResponseBody, _ := io.ReadAll(w.Body)
-	json.Unmarshal(getResponseBody, &readResponseFromAPI)
+	readResponseFromAPI := h.MakeGetRequest(r, w, getRequestBody)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expectedReadResponseFromAPI.Author, readResponseFromAPI.Author)
@@ -87,11 +62,8 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	deleteRequestBody, _ := json.Marshal(map[string]string{
 		"fullMessagePath": testMessageRefPath,
 	})
-	deleteRequest, _ := http.NewRequest("DELETE", testingRoute, bytes.NewBuffer(deleteRequestBody))
 
-	r.ServeHTTP(w, deleteRequest)
-	deleteResponseBody, _ := io.ReadAll(w.Body)
-	json.Unmarshal(deleteResponseBody, &deleteResponseFromAPI)
+	deleteResponseFromAPI := h.MakeDeleteRequest(r, w, deleteRequestBody)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expectedDeleteResponseFromAPI, deleteResponseFromAPI.RemovedFullMessagePath)

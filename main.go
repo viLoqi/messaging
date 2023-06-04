@@ -3,20 +3,18 @@ package main
 import (
 	"log"
 	core "loqi/messaging/core"
+	"loqi/messaging/structs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func ReadFireStoreHandler(c *gin.Context) {
-	type ReadMessageRequestBody struct {
-		FullMessagePath string `json:"fullMessagePath"`
-	}
 
 	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	var requestBody ReadMessageRequestBody
+	var requestBody structs.ReadMessageRequestBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Read RequestBody Error: %s\n", err)
 	}
@@ -31,15 +29,11 @@ func ReadFireStoreHandler(c *gin.Context) {
 }
 
 func WriteFireStoreHandler(c *gin.Context) {
-	type WriteMessageRequestBody struct {
-		CollectionPath string `json:"collectionPath"`
-		Content        string `json:"content"`
-	}
 
 	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	var requestBody WriteMessageRequestBody
+	var requestBody structs.WriteMessageRequestBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Write RequestBody Error: %s\n", err)
 	}
@@ -54,15 +48,11 @@ func WriteFireStoreHandler(c *gin.Context) {
 }
 
 func PatchFireStoreHandler(c *gin.Context) {
-	type PatchMessageRequestBody struct {
-		FullMessagePath string `json:"fullMessagePath"`
-		Content         string `json:"content"`
-	}
 
 	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	var requestBody PatchMessageRequestBody
+	var requestBody structs.PatchMessageRequestBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Patch RequestBody Error: %s\n", err)
 	}
@@ -78,14 +68,11 @@ func PatchFireStoreHandler(c *gin.Context) {
 }
 
 func DeleteFireStoreHandler(c *gin.Context) {
-	type DeleteMessageRequestBody struct {
-		FullMessagePath string `json:"fullMessagePath"`
-	}
 
 	client, ctx := core.CreateFireStoreClient()
 	defer client.Close()
 
-	var requestBody DeleteMessageRequestBody
+	var requestBody structs.DeleteMessageRequestBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		log.Printf("Delete RequestBody Error: %s\n", err)
 	}
