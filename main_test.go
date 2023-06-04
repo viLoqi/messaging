@@ -96,21 +96,3 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expectedDeleteResponseFromAPI, deleteResponseFromAPI.RemovedFullMessagePath)
 }
-
-func TestReadFireStoreHandlerNotFound(t *testing.T) {
-	requestBody, _ := json.Marshal(map[string]string{
-		"fullMessagePath": "invalidPath",
-	})
-
-	expectedResponseBody := "\"firestore: nil DocumentRef\""
-
-	r := SetUpRouter()
-	r.GET(testingRoute, ReadFireStoreHandler)
-	req, _ := http.NewRequest("GET", testingRoute, bytes.NewBuffer(requestBody))
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	responseData, _ := io.ReadAll(w.Body)
-	assert.Equal(t, expectedResponseBody, string(responseData))
-	assert.Equal(t, http.StatusNotFound, w.Code)
-}

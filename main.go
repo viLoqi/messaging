@@ -1,122 +1,81 @@
 package main
 
 import (
-	"context"
 	"log"
+	h "loqi/messaging/helper"
 	"net/http"
 
 	"cloud.google.com/go/firestore"
-	firebase "firebase.google.com/go"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/api/option"
 )
 
-type ReadMessageRequestBody struct {
-	FullMessagePath string `json:"fullMessagePath"`
-}
-
-type WriteMessageRequestBody struct {
-	CollectionPath string `json:"collectionPath"`
-	Content        string `json:"content"`
-}
-
-type PatchMessageRequestBody struct {
-	FullMessagePath string `json:"fullMessagePath"`
-	Content         string `json:"content"`
-}
-
-func SanitizeFirestorePath(path string) string {
-	// Removes trailing / if there is one
-	if len(path) > 0 {
-		lastIndex := len(path) - 1
-		if path[lastIndex] == '/' {
-			return path[:lastIndex]
-		}
-	}
-	return path
-}
-
-func CreateFireStoreClient() (*firestore.Client, context.Context) {
-	// Use a service account
-	ctx := context.Background()
-	sa := option.WithCredentialsFile("./credentials.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return client, ctx
-}
-
 func ReadFireStoreHandler(c *gin.Context) {
+	type ReadMessageRequestBody struct {
+		FullMessagePath string `json:"fullMessagePath"`
+	}
+
 	var requestBody ReadMessageRequestBody
 
-	client, ctx := CreateFireStoreClient()
+	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
 	if err := c.BindJSON(&requestBody); err != nil {
-		// DO SOMETHING WITH THE ERROR
 		log.Printf("Read RequestBody Error: %s\n", err)
 	}
 
-	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+	path := requestBody.FullMessagePath
 
-	dsnap, err := client.Doc(path).Get(ctx)
+	data, err := h.GetSnapShotData(client, ctx, path)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, err.Error())
 	} else {
-		m := dsnap.Data()
-		c.JSON(http.StatusOK, m)
+		c.JSON(http.StatusOK, data)
 	}
 }
 
 func WriteFireStoreHandler(c *gin.Context) {
+	type WriteMessageRequestBody struct {
+		CollectionPath string `json:"collectionPath"`
+		Content        string `json:"content"`
+	}
+
 	var requestBody WriteMessageRequestBody
 
 	if err := c.BindJSON(&requestBody); err != nil {
-		// DO SOMETHING WITH THE ERROR
 		log.Printf("Write RequestBody Error: \n%s", err)
 	}
 
-	client, ctx := CreateFireStoreClient()
+	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
-	collectionPath := SanitizeFirestorePath(requestBody.CollectionPath)
+	path := requestBody.CollectionPath
 
-	ref := client.Collection(collectionPath).NewDoc()
+	res, err := h.CreateNewDocument(client, ctx, path, requestBody.Content)
 
-	if _, err := ref.Set(ctx, gin.H{
-		"author":       "Testing Script",
-		"content":      requestBody.Content,
-		"firstCreated": firestore.ServerTimestamp,
-		"lastUpdated":  firestore.ServerTimestamp,
-	}); err != nil {
-		// Handle any errors in an appropriate way, such as returning them.
+	if err != nil {
 		log.Printf("Write Failure: %s\n", err)
+		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"messageID": ref.ID,
-		})
+		c.JSON(http.StatusOK, res)
 	}
 }
 
 func DeleteFireStoreHandler(c *gin.Context) {
-	var requestBody ReadMessageRequestBody
+	type DeleteMessageRequestBody struct {
+		FullMessagePath string `json:"fullMessagePath"`
+	}
+	var requestBody DeleteMessageRequestBody
 
 	if err := c.BindJSON(&requestBody); err != nil {
 		// DO SOMETHING WITH THE ERROR
 		log.Printf("Delete RequestBody Error: \n%s", err)
 	}
 
-	client, ctx := CreateFireStoreClient()
+	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
-	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+	path := requestBody.FullMessagePath
 
 	if _, err := client.Doc(requestBody.FullMessagePath).Delete(ctx); err != nil {
 		// Usually document not found
@@ -129,6 +88,11 @@ func DeleteFireStoreHandler(c *gin.Context) {
 }
 
 func PatchFireStoreHandler(c *gin.Context) {
+	type PatchMessageRequestBody struct {
+		FullMessagePath string `json:"fullMessagePath"`
+		Content         string `json:"content"`
+	}
+
 	var requestBody PatchMessageRequestBody
 
 	if err := c.BindJSON(&requestBody); err != nil {
@@ -136,10 +100,10 @@ func PatchFireStoreHandler(c *gin.Context) {
 		log.Printf("Update RequestBody Error: \n%s", err)
 	}
 
-	client, ctx := CreateFireStoreClient()
+	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
-	path := SanitizeFirestorePath(requestBody.FullMessagePath)
+	path := requestBody.FullMessagePath
 	newContent := requestBody.Content
 
 	if _, err := client.Doc(path).Update(ctx, []firestore.Update{

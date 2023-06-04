@@ -4,34 +4,37 @@ Write/Update records in Firestore
 
 **Simulate API Requests with curl**
 
+
+**POST**
 ```bash
 curl -X POST http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
     "collectionPath": "chats/SAM101/sec01/room/messages",
     "content": "This is written RIGHT NOW!"
 }'
-
-Output:
+```
+Response
+```tsx
 {
-    "messageID": "ID of the new message"
+    "messageID": uuid
 }
 ```
 
+**GET**
 ```bash
 curl -X GET http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
     "fullMessagePath": "chats/SAM101/sec01/room/messages/{messageID}"
 }'
-
-Output:
+```
+Response
+```tsx
 {
-  "author": string,
-  "content": string,
-  "firstCreated": timestamp,
-  "lastUpdated": timestamp
+    "UpdateTime": Date
 }
 ```
 
+**PATCH**
 ```bash
 curl -X PATCH http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
@@ -44,7 +47,7 @@ Output:
     "patchedFullMessagePath": "Copy of fullMessagePath"
 }
 ```
-
+**DELETE**
 ```bash
 curl -X DELETE http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
