@@ -12,7 +12,9 @@ curl -X POST http://localhost:8080/api/messaging -H 'Content-Type: application/j
 }'
 
 Output:
-{"messageID": "ID of the new message"}
+{
+    "messageID": "ID of the new message"
+}
 ```
 
 ```bash
@@ -38,7 +40,9 @@ curl -X PATCH http://localhost:8080/api/messaging -H 'Content-Type: application/
 }
 
 Output:
-{"patchedFullMessagePath":"Copy of fullMessagePath"}
+{
+    "patchedFullMessagePath": "Copy of fullMessagePath"
+}
 ```
 
 ```bash
@@ -48,5 +52,7 @@ curl -X DELETE http://localhost:8080/api/messaging -H 'Content-Type: application
 }'
 
 Output:
-{"removedFullMessagePath":"Copy of fullMessagePath"
+{
+    "removedFullMessagePath": "Copy of fullMessagePath"
+}
 ```
