@@ -5,7 +5,6 @@ import (
 	h "loqi/messaging/helper"
 	"net/http"
 
-	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,12 +22,10 @@ func ReadFireStoreHandler(c *gin.Context) {
 		log.Printf("Read RequestBody Error: %s\n", err)
 	}
 
-	path := requestBody.FullMessagePath
-
-	data, err := h.GetSnapShotData(client, ctx, path)
+	data, err := h.GetSnapShotData(client, ctx, requestBody.FullMessagePath)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
 		c.JSON(http.StatusOK, data)
 	}
@@ -49,41 +46,12 @@ func WriteFireStoreHandler(c *gin.Context) {
 	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
-	path := requestBody.CollectionPath
-
-	res, err := h.CreateNewDocument(client, ctx, path, requestBody.Content)
+	res, err := h.CreateNewDocument(client, ctx, requestBody.CollectionPath, requestBody.Content)
 
 	if err != nil {
-		log.Printf("Write Failure: %s\n", err)
 		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
 		c.JSON(http.StatusOK, res)
-	}
-}
-
-func DeleteFireStoreHandler(c *gin.Context) {
-	type DeleteMessageRequestBody struct {
-		FullMessagePath string `json:"fullMessagePath"`
-	}
-	var requestBody DeleteMessageRequestBody
-
-	if err := c.BindJSON(&requestBody); err != nil {
-		// DO SOMETHING WITH THE ERROR
-		log.Printf("Delete RequestBody Error: \n%s", err)
-	}
-
-	client, ctx := h.CreateFireStoreClient()
-	defer client.Close()
-
-	path := requestBody.FullMessagePath
-
-	if _, err := client.Doc(requestBody.FullMessagePath).Delete(ctx); err != nil {
-		// Usually document not found
-		c.JSON(http.StatusInternalServerError, err.Error())
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"removedFullMessagePath": path,
-		})
 	}
 }
 
@@ -103,27 +71,38 @@ func PatchFireStoreHandler(c *gin.Context) {
 	client, ctx := h.CreateFireStoreClient()
 	defer client.Close()
 
-	path := requestBody.FullMessagePath
-	newContent := requestBody.Content
+	res, err := h.UpdateDocument(client, ctx, requestBody.FullMessagePath, requestBody.Content)
 
-	if _, err := client.Doc(path).Update(ctx, []firestore.Update{
-		{
-			Path:  "content",
-			Value: newContent,
-		},
-		{
-			Path:  "lastUpdated",
-			Value: firestore.ServerTimestamp,
-		},
-	}); err != nil {
-		// Usually document not found
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"patchedFullMessagePath": path,
-		})
+		c.JSON(http.StatusOK, res)
 	}
 
+}
+
+func DeleteFireStoreHandler(c *gin.Context) {
+	type DeleteMessageRequestBody struct {
+		FullMessagePath string `json:"fullMessagePath"`
+	}
+	var requestBody DeleteMessageRequestBody
+
+	if err := c.BindJSON(&requestBody); err != nil {
+		log.Printf("Delete RequestBody Error: \n%s", err)
+	}
+
+	client, ctx := h.CreateFireStoreClient()
+	defer client.Close()
+
+	path := requestBody.FullMessagePath
+
+	res, err := h.DeleteDocument(client, ctx, path)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+	} else {
+		c.JSON(http.StatusOK, res)
+	}
 }
 
 func HomeHandler(c *gin.Context) {

@@ -43,3 +43,33 @@ func CreateNewDocument(client *firestore.Client, ctx context.Context, path, cont
 
 	return res, err
 }
+
+func DeleteDocument(client *firestore.Client, ctx context.Context, path string) (*firestore.WriteResult, error) {
+	res, err := client.Doc(path).Delete(ctx)
+	return res, err
+}
+
+func UpdateDocument(client *firestore.Client, ctx context.Context, path, content string) (*firestore.WriteResult, error) {
+	res, err := client.Doc(path).Update(ctx, []firestore.Update{
+		{
+			Path:  "content",
+			Value: content,
+		},
+		{
+			Path:  "lastUpdated",
+			Value: firestore.ServerTimestamp,
+		},
+	})
+	return res, err
+}
+
+type RequestBodyDefinition interface {
+	area() float64
+	perim() float64
+}
+
+func BindRequestBody(c *gin.Context, destination *RequestBodyDefinition) {
+	if err := c.BindJSON(destination); err != nil {
+		log.Printf("Read RequestBody Error: %s\n", err)
+	}
+}

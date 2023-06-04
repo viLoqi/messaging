@@ -1,6 +1,6 @@
 # messaging
 
-Write/Update records in Firestore
+Service to write/update/delete records stored inside Firebase Firestore.
 
 **Simulate API Requests with curl**
 
@@ -41,21 +41,24 @@ curl -X PATCH http://localhost:8080/api/messaging -H 'Content-Type: application/
     "fullMessagePath": "chats/SAM101/sec01/room/messages/{messageID}",
     "content": "This is a revised version"
 }
-
-Output:
+```
+Response
+```tsx
 {
-    "patchedFullMessagePath": "Copy of fullMessagePath"
+    "UpdateTime": Date
 }
 ```
+
 **DELETE**
 ```bash
 curl -X DELETE http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
     "fullMessagePath": "chats/SAM101/sec01/room/messages/{messageID}"
 }'
-
-Output:
+```
+Response
+```tsx
 {
-    "removedFullMessagePath": "Copy of fullMessagePath"
+    "UpdateTime": Date
 }
 ```
