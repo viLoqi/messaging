@@ -1,5 +1,7 @@
 # messaging
 
+- The current implementation requires the `credentials.json` file
+
 Service to write/update/delete records stored inside Firebase Firestore.
 
 **Simulate API Requests with curl**
