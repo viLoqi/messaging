@@ -10,15 +10,13 @@ RUN apk update && apk add --no-cache 'git=~2'
 ENV GO111MODULE=on
 WORKDIR $GOPATH/src/packages/goginapp/
 
+COPY go.mod .
+
 # Fetch dependencies.
-# Using go get.
-RUN go get -d -v
+# Using go mod download.
+RUN go mod download
 
-
-# Move this after go get for optimization
-# So now go get won't have to run when there's no change to dependcies
 COPY . .
-
 
 # Build the binary.
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/main .
