@@ -6,6 +6,7 @@ type ReadMessageRequestBody struct {
 
 type WriteMessageRequestBody struct {
 	CollectionPath string `json:"collectionPath"`
+	Author         string `json:"author"`
 	Content        string `json:"content"`
 }
 

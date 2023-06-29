@@ -31,11 +31,11 @@ func GetSnapShotData(client *firestore.Client, ctx context.Context, path string)
 	return dsnap.Data(), err
 }
 
-func CreateNewDocument(client *firestore.Client, ctx context.Context, path, content string) (*firestore.DocumentRef, error) {
+func CreateNewDocument(client *firestore.Client, ctx context.Context, path, author, content string) (*firestore.DocumentRef, error) {
 	ref := client.Collection(path).NewDoc()
 
 	_, err := ref.Set(ctx, gin.H{
-		"author":       "Testing Script",
+		"author":       author,
 		"content":      content,
 		"firstCreated": firestore.ServerTimestamp,
 		"lastUpdated":  firestore.ServerTimestamp,

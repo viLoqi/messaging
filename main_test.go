@@ -38,6 +38,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	// Testing POST Functionalities
 	postRequestBody, _ := json.Marshal(map[string]string{
 		"collectionPath": unitTestCollection,
+		"author":         "Testing Script",
 		"content":        "This is to test read functionality",
 	})
 
