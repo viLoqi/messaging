@@ -12,7 +12,8 @@ Service to write/update/delete records stored inside Firebase Firestore.
 curl -X POST http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
     "collectionPath": "chats/SAM101/sec01/room/messages",
-    "content": "This is written RIGHT NOW!"
+    "content": "This is written RIGHT NOW!",
+    "author": "Jie Chen"
 }'
 ```
 Response
