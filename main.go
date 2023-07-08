@@ -41,7 +41,7 @@ func WriteFireStoreHandler(c *gin.Context) {
 		log.Printf("Write RequestBody Error: %s\n", err)
 	}
 
-	ref, err := core.CreateNewDocument(client, ctx, requestBody.CollectionPath, requestBody.Author, requestBody.Content)
+	ref, err := core.CreateNewDocument(client, ctx, requestBody.CollectionPath, requestBody.Author, requestBody.Content, requestBody.AuthorPhotoURL)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
