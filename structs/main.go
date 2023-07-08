@@ -21,10 +21,11 @@ type DeleteMessageRequestBody struct {
 }
 
 type ReadResponseBody struct {
-	Author       string `json:"author"`
-	Content      string `json:"content"`
-	FirstCreated int    `json:"firstCreated"`
-	LastUpdated  int    `json:"lastUpdated"`
+	Author         string `json:"author"`
+	AuthorPhotoURL string `json:"authorPhotoURL"`
+	Content        string `json:"content"`
+	FirstCreated   int    `json:"firstCreated"`
+	LastUpdated    int    `json:"lastUpdated"`
 }
 
 type WriteResponseBody struct {

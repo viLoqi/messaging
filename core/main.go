@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"log"
+	"loqi/messaging/structs"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -31,13 +32,13 @@ func GetSnapShotData(client *firestore.Client, ctx context.Context, path string)
 	return dsnap.Data(), err
 }
 
-func CreateNewDocument(client *firestore.Client, ctx context.Context, path, author, content, authorPhotoURL string) (*firestore.DocumentRef, error) {
-	ref := client.Collection(path).NewDoc()
+func CreateNewDocument(client *firestore.Client, ctx context.Context, requestBody structs.WriteMessageRequestBody) (*firestore.DocumentRef, error) {
+	ref := client.Collection(requestBody.CollectionPath).NewDoc()
 
 	_, err := ref.Set(ctx, gin.H{
-		"author":         author,
-		"authorPhotoURL": authorPhotoURL,
-		"content":        content,
+		"author":         requestBody.Author,
+		"authorPhotoURL": requestBody.AuthorPhotoURL,
+		"content":        requestBody.Content,
 		"firstCreated":   firestore.ServerTimestamp,
 		"lastUpdated":    firestore.ServerTimestamp,
 	})

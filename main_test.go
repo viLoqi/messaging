@@ -26,7 +26,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	var expectedReadResponseFromAPI structs.ReadResponseBody
 
 	// Initialization
-	json.Unmarshal([]byte(`{"author":"Testing Script","content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
+	json.Unmarshal([]byte(`{"author":"Testing Script", "authorPhotoURL":"https://test.com", "content":"This is to test read functionality", "firstCreated": 12312312}`), &expectedReadResponseFromAPI)
 
 	// Setting up Routes
 	r := SetUpRouter()
@@ -39,6 +39,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 	postRequestBody, _ := json.Marshal(map[string]string{
 		"collectionPath": unitTestCollection,
 		"author":         "Testing Script",
+		"authorPhotoURL": "https://test.com",
 		"content":        "This is to test read functionality",
 	})
 
@@ -55,6 +56,7 @@ func TestReadWriteAndDeleteFireStoreHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, expectedReadResponseFromAPI.Author, readResponseFromAPI.Author)
+	assert.Equal(t, expectedReadResponseFromAPI.AuthorPhotoURL, readResponseFromAPI.AuthorPhotoURL)
 	assert.Equal(t, expectedReadResponseFromAPI.Content, readResponseFromAPI.Content)
 
 	// Testing DELETE Functionalities
