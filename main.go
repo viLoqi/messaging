@@ -90,7 +90,7 @@ func DeleteFireStoreHandler(c *gin.Context) {
 	}
 }
 
-func HomeHandler(c *gin.Context) {
+func InfoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Welcome to Loqi's Messaging API"})
 }
 
@@ -114,9 +114,9 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	var messagingServiceRoute = "/api/messaging"
+	var messagingServiceRoute = "/"
 
-	r.GET("/", HomeHandler)
+	r.GET("/info", InfoHandler)
 	r.GET(messagingServiceRoute, ReadFireStoreHandler)
 	r.POST(messagingServiceRoute, WriteFireStoreHandler)
 	r.DELETE(messagingServiceRoute, DeleteFireStoreHandler)
