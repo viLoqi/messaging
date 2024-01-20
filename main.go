@@ -114,13 +114,13 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	var messagingServiceRoute = "/"
+	var pathPrefix = "/api/messaging"
 
-	r.GET("/about", AboutHandler)
-	r.GET(messagingServiceRoute, ReadFireStoreHandler)
-	r.POST(messagingServiceRoute, WriteFireStoreHandler)
-	r.DELETE(messagingServiceRoute, DeleteFireStoreHandler)
-	r.PATCH(messagingServiceRoute, PatchFireStoreHandler)
+	r.GET(pathPrefix+"/about", AboutHandler)
+	r.GET(pathPrefix, ReadFireStoreHandler)
+	r.POST(pathPrefix, WriteFireStoreHandler)
+	r.DELETE(pathPrefix, DeleteFireStoreHandler)
+	r.PATCH(pathPrefix, PatchFireStoreHandler)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
