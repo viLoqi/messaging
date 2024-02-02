@@ -13,7 +13,8 @@ curl -X POST http://localhost:8080/api/messaging -H 'Content-Type: application/j
 '{
     "collectionPath": "chats/SAM101/sec01/room/messages",
     "content": "This is written RIGHT NOW!",
-    "author": "Jie Chen"
+    "author": "Jie Chen",
+    "authorPhotoURL": "www."
 }'
 ```
 Response
