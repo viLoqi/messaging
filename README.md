@@ -7,7 +7,7 @@ Service to write/update/delete records stored inside Firebase Firestore.
 **Simulate API Requests with curl**
 
 
-`**POST** /api/messaging`
+`POST /api/messaging`
 ```bash
 curl -X POST http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
@@ -24,7 +24,7 @@ Response
 }
 ```
 
-`**GET** /api/messaging`
+`GET /api/messaging`
 ```bash
 curl -X GET http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
@@ -41,7 +41,7 @@ Response
 }
 ```
 
-`**PATCH** /api/messaging`
+`PATCH /api/messaging`
 ```bash
 curl -X PATCH http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
@@ -56,7 +56,7 @@ Response
 }
 ```
 
-`**DELETE** /api/messaging`
+`DELETE /api/messaging`
 ```bash
 curl -X DELETE http://localhost:8080/api/messaging -H 'Content-Type: application/json' -d \
 '{
